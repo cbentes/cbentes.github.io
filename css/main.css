@@ -1,0 +1,23 @@
+.bg-green { 
+    background-color: #1abc9c; /* Green */
+    color: #ffffff;
+}
+.bg-blue { 
+    background-color: #474e5d; /* Dark Blue */
+    color: #ffffff;
+}
+.bg-white { 
+    background-color: #ffffff; /* White */
+    color: #555555;
+}
+
+.bg-black { 
+    background-color: #000000; /* White */
+    color: #ffffff;
+}
+
+.profile_photo {
+    border: 0px;
+    width: 100px;
+    height: 100px;
+}
