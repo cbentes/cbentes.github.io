@@ -16,6 +16,11 @@
     color: #ffffff;
 }
 
+.btn{
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
 .profile_photo {
     border: 0px;
     width: 100px;
@@ -28,4 +33,9 @@ p.abstract {
 
 b.me {
     color: #909090;
+}
+
+.publ_img{
+    width:64px;
+    height:64px;
 }
