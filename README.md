@@ -11,13 +11,13 @@ Run locally:
 bundle exec jekyll serve
 ```
 
-Build
+Build:
 ```
 rm -rf _site
 bundle exec jekyll build
 ```
 
-Deploy
+Deploy:
 ```
 git subtree push --prefix _site origin gh-pages
 ```
