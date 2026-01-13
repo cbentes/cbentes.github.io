@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://cbentes.github.io/sitemap.xml

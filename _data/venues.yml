@@ -1,0 +1,38 @@
+"IEEE JOE":
+  url: https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=48
+  color: "#00629B"
+
+"IGARSS":
+  url: https://www.igarss.org/
+  color: "#1E90FF"
+
+"EUSAR":
+  url: https://www.eusar.de/
+  color: "#E63946"
+
+"IJRS":
+  url: https://www.tandfonline.com/toc/tres20/current
+  color: "#2A9D8F"
+
+"CEAS":
+  url: https://www.springer.com/journal/12567
+  color: "#6A0DAD"
+
+"LARS/SBR":
+  url: https://www.jointconferenceonrobotics.org/
+  color: "#F4A261"
+
+"RTSI":
+  url: https://rtsi.ieee.org/
+  color: "#00629B"
+
+"FuSec":
+  url: https://www.sifo.de/
+  color: "#264653"
+
+"arXiv":
+  url: https://arxiv.org/
+  color: "#B31B1B"
+
+"Thesis":
+  color: "#6C757D"
