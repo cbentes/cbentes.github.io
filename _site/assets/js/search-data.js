@@ -63,6 +63,13 @@ ninja.data = [{
           window.open("https://www.kaggle.com/cbentes", "_blank");
         },
       },{
+        id: 'social-medium',
+        title: 'Medium',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://medium.com/@cbentes", "_blank");
+        },
+      },{
         id: 'social-rss',
         title: 'RSS Feed',
         section: 'Socials',

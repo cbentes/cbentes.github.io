@@ -7,8 +7,6 @@ profile:
   align: left
   image: kg_cbentes_small.png
   image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>Estonia</p>
 
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
@@ -24,4 +22,8 @@ latest_posts:
   limit: 3
 ---
 
-Hi there!
+Hello there!
+
+I'm an AI generalist based in Estonia, with over a decade of experience building ML systems across diverse domains. Most recently I've focused on speech AI models for real-time translation, neural codec architectures, and multimodal LLM reasoning.
+
+Feel free to connect with me on one of the social links below and start a conversation.
