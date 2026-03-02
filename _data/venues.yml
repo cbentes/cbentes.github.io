@@ -34,5 +34,13 @@
   url: https://arxiv.org/
   color: "#B31B1B"
 
+"Bolt":
+  url: https://bolt.eu/en/blog/category/tech-at-bolt/
+  color: "#34D186"
+
+"Pinch":
+  url: https://www.startpinch.com/research
+  color: "#FF6B35"
+
 "Thesis":
   color: "#6C757D"

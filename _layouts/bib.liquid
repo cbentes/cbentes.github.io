@@ -1,6 +1,21 @@
 ---
 ---
-<div class="row">
+{%- assign _proceedings = 'inproceedings,incollection' | split: ',' -%}
+{%- assign _thesis_types = 'thesis,mastersthesis,phdthesis' | split: ',' -%}
+{%- if entry.type == 'article' -%}
+  {%- assign bib_type = 'journal' -%}
+{%- elsif _proceedings contains entry.type -%}
+  {%- assign bib_type = 'conference' -%}
+{%- elsif _thesis_types contains entry.type -%}
+  {%- if entry.role == 'supervisor' -%}
+    {%- assign bib_type = 'supervision' -%}
+  {%- else -%}
+    {%- assign bib_type = 'thesis' -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign bib_type = 'other' -%}
+{%- endif -%}
+<div class="row" data-bib-type="{{ bib_type }}">
   {% if site.enable_publication_thumbnails %}
     <div class="col col-sm-2 abbr">
       {%- if entry.abbr -%}
