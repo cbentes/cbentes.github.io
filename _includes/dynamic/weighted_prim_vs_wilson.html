@@ -1,0 +1,220 @@
+
+<style>
+.pw-wrap{position:relative;padding:6px 0 14px}
+.wr{display:flex;gap:10px;justify-content:center;flex-wrap:nowrap;margin-bottom:10px}
+.wc{display:flex;flex-direction:column;align-items:center;gap:4px}
+.wn{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.ws{font-size:10px;color:var(--color-text-secondary);margin-bottom:2px}
+.st{width:142px;margin-top:3px}
+.sr{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.sl{font-size:9px;color:var(--color-text-secondary);min-width:58px;flex-shrink:0}
+.sbg{flex:1;height:5px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden}
+.sf{height:100%;border-radius:3px}
+.sv{font-size:9px;color:var(--color-text-secondary);min-width:26px;text-align:right;flex-shrink:0}
+.leg{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0;font-size:11px;color:var(--color-text-secondary)}
+.li{display:flex;align-items:center;gap:4px}
+.ls{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid transparent}
+.ls-de{background:#FAECE7;border-color:#D85A30}
+.ls-co{background:#E6F1FB;border-color:#378ADD}
+.ls-ju{background:#E1F5EE;border-color:#1D9E75}
+@media(prefers-color-scheme:dark){
+.ls-de{background:#4a1b0c;border-color:#993C1D}
+.ls-co{background:#042C53;border-color:#185FA5}
+.ls-ju{background:#04342C;border-color:#0F6E56}
+}
+#pw-regen{position:absolute;left:0;top:0;width:32px;height:32px;padding:0;border:none;background:none;cursor:pointer;font-size:24px;line-height:32px;text-align:center;color:var(--color-text-secondary,#888);opacity:.45;transition:opacity .2s}
+#pw-regen:hover{opacity:1}
+</style>
+
+<div class="pw-wrap">
+  <button id="pw-regen" title="Regenerate mazes">&#x21bb;</button>
+  <div class="wr">
+    <div class="wc">
+      <div class="wn">DFS</div>
+      <div class="ws">recursive backtracker</div>
+      <canvas id="cv-dfs" width="142" height="142" style="display:block;border-radius:3px"></canvas>
+      <div class="st" id="st-dfs"></div>
+    </div>
+    <div class="wc">
+      <div class="wn">Prim's</div>
+      <div class="ws">random frontier edge</div>
+      <canvas id="cv-pr" width="142" height="142" style="display:block;border-radius:3px"></canvas>
+      <div class="st" id="st-pr"></div>
+    </div>
+    <div class="wc">
+      <div class="wn">Kruskal's</div>
+      <div class="ws">global random edges</div>
+      <canvas id="cv-kr" width="142" height="142" style="display:block;border-radius:3px"></canvas>
+      <div class="st" id="st-kr"></div>
+    </div>
+    <div class="wc">
+      <div class="wn">Wilson's</div>
+      <div class="ws">loop-erased random walk</div>
+      <canvas id="cv-wi" width="142" height="142" style="display:block;border-radius:3px"></canvas>
+      <div class="st" id="st-wi"></div>
+    </div>
+  </div>
+  <div class="leg">
+    <span class="li"><span class="ls ls-de"></span>Dead end</span>
+    <span class="li"><span class="ls ls-co"></span>Corridor</span>
+    <span class="li"><span class="ls ls-ju"></span>Junction</span>
+  </div>
+</div>
+
+<script>
+(function(){
+const GS=14,CS=8,WS=2;
+const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+const C={
+  wall:dk?'#141413':'#bebcb4',
+  pass:dk?'#252523':'#ffffff',
+  de:  dk?'#4a1b0c':'#FAECE7',
+  co:  dk?'#042C53':'#E6F1FB',
+  ju:  dk?'#04342C':'#E1F5EE',
+};
+
+const idx=(r,c)=>r*GS+c;
+const rc=i=>[Math.floor(i/GS),i%GS];
+const rnd=n=>Math.floor(Math.random()*n);
+const sh=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+function nbrs(r,c){return[[r-1,c,'n','s'],[r+1,c,'s','n'],[r,c-1,'w','e'],[r,c+1,'e','w']].filter(([nr,nc])=>nr>=0&&nr<GS&&nc>=0&&nc<GS);}
+function initM(){return Array.from({length:GS*GS},()=>({n:0,s:0,e:0,w:0}));}
+function carve(m,r1,c1,d1,r2,c2,d2){m[idx(r1,c1)][d1]=1;m[idx(r2,c2)][d2]=1;}
+function deg(m,i){const p=m[i];return p.n+p.s+p.e+p.w;}
+function ctype(m,i){const d=deg(m,i);return d===1?'de':d===2?'co':'ju';}
+
+function dfs(){
+  const m=initM(),vis=new Uint8Array(GS*GS);
+  const sr=rnd(GS),sc=rnd(GS);
+  vis[idx(sr,sc)]=1;
+  const st=[idx(sr,sc)];
+  while(st.length){
+    const cur=st[st.length-1],[r,c]=rc(cur);
+    const opts=sh(nbrs(r,c).filter(([nr,nc])=>!vis[idx(nr,nc)]));
+    if(opts.length){
+      const[nr,nc,d1,d2]=opts[0];
+      carve(m,r,c,d1,nr,nc,d2);
+      vis[idx(nr,nc)]=1;
+      st.push(idx(nr,nc));
+    } else st.pop();
+  }
+  return m;
+}
+
+function randomPrim(){
+  const m=initM(),vis=new Uint8Array(GS*GS);
+  const sr=rnd(GS),sc=rnd(GS);
+  vis[idx(sr,sc)]=1;
+  let front=[];
+  nbrs(sr,sc).forEach(([nr,nc,d1,d2])=>front.push({r1:sr,c1:sc,d1,r2:nr,c2:nc,d2}));
+  while(front.length){
+    const fi=rnd(front.length);
+    const{r1,c1,d1,r2,c2,d2}=front[fi];
+    front.splice(fi,1);
+    if(vis[idx(r2,c2)])continue;
+    carve(m,r1,c1,d1,r2,c2,d2);
+    vis[idx(r2,c2)]=1;
+    nbrs(r2,c2).forEach(([nr,nc,nd1,nd2])=>{
+      if(!vis[idx(nr,nc)])front.push({r1:r2,c1:c2,d1:nd1,r2:nr,c2:nc,d2:nd2});
+    });
+  }
+  return m;
+}
+
+function kruskal(){
+  const m=initM(),N=GS*GS;
+  const parent=Array.from({length:N},(_,i)=>i),rank=new Uint8Array(N);
+  function find(x){while(parent[x]!==x)x=parent[x]=parent[parent[x]];return x;}
+  function union(a,b){a=find(a);b=find(b);if(a===b)return false;if(rank[a]<rank[b])[a,b]=[b,a];parent[b]=a;if(rank[a]===rank[b])rank[a]++;return true;}
+  const edges=[];
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    if(c<GS-1)edges.push([r,c,'e',r,c+1,'w']);
+    if(r<GS-1)edges.push([r,c,'s',r+1,c,'n']);
+  }
+  sh(edges);
+  for(const[r1,c1,d1,r2,c2,d2]of edges){
+    if(union(idx(r1,c1),idx(r2,c2)))carve(m,r1,c1,d1,r2,c2,d2);
+  }
+  return m;
+}
+
+function wilson(){
+  const m=initM(),inM=new Uint8Array(GS*GS);
+  const opp={n:'s',s:'n',e:'w',w:'e'};
+  const dir=(r1,c1,r2,c2)=>r2<r1?'n':r2>r1?'s':c2<c1?'w':'e';
+  inM[idx(rnd(GS),rnd(GS))]=1;
+  while(inM.some(v=>!v)){
+    const unv=[];for(let i=0;i<GS*GS;i++)if(!inM[i])unv.push(i);
+    let path=[unv[rnd(unv.length)]],safe=0;
+    while(!inM[path[path.length-1]]&&safe++<500000){
+      const[cr,cc]=rc(path[path.length-1]);
+      const ni=nbrs(cr,cc).map(([nr,nc])=>idx(nr,nc));
+      const next=ni[rnd(ni.length)];
+      const li=path.lastIndexOf(next);
+      if(li>=0&&!inM[next])path=path.slice(0,li+1);
+      else path.push(next);
+    }
+    for(let k=0;k<path.length-1;k++){
+      if(!inM[path[k]]){
+        inM[path[k]]=1;
+        const[r1,c1]=rc(path[k]);const[r2,c2]=rc(path[k+1]);
+        const d=dir(r1,c1,r2,c2);
+        carve(m,r1,c1,d,r2,c2,opp[d]);
+      }
+    }
+    if(!inM[path[path.length-1]])inM[path[path.length-1]]=1;
+  }
+  return m;
+}
+
+function draw(id,m){
+  const cvs=document.getElementById(id),ctx=cvs.getContext('2d');
+  ctx.fillStyle=C.wall;ctx.fillRect(0,0,cvs.width,cvs.height);
+  const cx=c=>WS+c*(CS+WS),cy=r=>WS+r*(CS+WS);
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    ctx.fillStyle=C[ctype(m,idx(r,c))];
+    ctx.fillRect(cx(c),cy(r),CS,CS);
+  }
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    const p=m[idx(r,c)];
+    if(p.e&&c<GS-1){ctx.fillStyle=C.pass;ctx.fillRect(cx(c)+CS,cy(r),WS,CS);}
+    if(p.s&&r<GS-1){ctx.fillStyle=C.pass;ctx.fillRect(cx(c),cy(r)+CS,CS,WS);}
+  }
+  ctx.fillStyle=C.pass;
+  ctx.fillRect(cx(0),0,CS,WS);
+  ctx.fillRect(cx(GS-1),cy(GS-1)+CS,CS,WS);
+}
+
+function calcStats(m){
+  let de=0,co=0,ju=0;
+  const N=GS*GS;
+  for(let i=0;i<N;i++){const t=ctype(m,i);if(t==='de')de++;else if(t==='co')co++;else ju++;}
+  return{
+    de:Math.round(de/N*100),
+    co:Math.round(co/N*100),
+    ju:Math.round(ju/N*100)
+  };
+}
+
+function bar(pct,color){
+  return `<div class="sbg"><div class="sf" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
+function renderStats(id,s){
+  document.getElementById(id).innerHTML=`
+    <div class="sr"><span class="sl">Dead ends</span>${bar(s.de,'#D85A30')}<span class="sv">${s.de}%</span></div>
+    <div class="sr"><span class="sl">Corridors</span>${bar(s.co,'#378ADD')}<span class="sv">${s.co}%</span></div>
+    <div class="sr"><span class="sl">Junctions</span>${bar(s.ju,'#1D9E75')}<span class="sv">${s.ju}%</span></div>
+  `;
+}
+
+function regen(){
+  const dm=dfs(),pm=randomPrim(),km=kruskal(),wm=wilson();
+  draw('cv-dfs',dm);draw('cv-pr',pm);draw('cv-kr',km);draw('cv-wi',wm);
+  renderStats('st-dfs',calcStats(dm));renderStats('st-pr',calcStats(pm));
+  renderStats('st-kr',calcStats(km));renderStats('st-wi',calcStats(wm));
+}
+document.getElementById('pw-regen').addEventListener('click',regen);
+regen();
+})();
+</script>

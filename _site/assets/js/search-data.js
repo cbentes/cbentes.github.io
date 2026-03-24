@@ -23,7 +23,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/publications/";
           },
-        },{id: "post-template",
+        },{id: "post-a-maze",
+        
+          title: "A-Maze",
+        
+        description: "Creating mazes for my kids",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/a-maze/";
+          
+        },
+      },{id: "post-jepa-for-audio-encoding",
+        
+          title: "JEPA for audio encoding",
+        
+        description: "JEPA architecture for audio encoding",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/jepa-for-audio/";
+          
+        },
+      },{id: "post-template",
         
           title: "Template",
         

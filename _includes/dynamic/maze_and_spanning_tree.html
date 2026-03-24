@@ -1,0 +1,135 @@
+
+<style>
+#mv{padding:6px 0 14px;position:relative}
+#mv-top{display:flex;gap:20px;justify-content:center;align-items:flex-start}
+.mvc{display:flex;flex-direction:column;align-items:center;gap:5px}
+.mvh{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+#mv-div{width:1px;background:var(--color-border-tertiary);align-self:stretch;margin-top:24px}
+#mv-regen{position:absolute;left:0;top:0;width:32px;height:32px;padding:0;border:none;background:none;cursor:pointer;font-size:24px;line-height:32px;text-align:center;color:var(--color-text-secondary,#888);opacity:.45;transition:opacity .2s}
+#mv-regen:hover{opacity:1}
+</style>
+<div id="mv">
+  <div id="mv-top">
+    <div class="mvc">
+      <div class="mvh">Maze</div>
+      <canvas id="mv-maze" width="210" height="210" style="display:block;cursor:crosshair;border-radius:3px"></canvas>
+    </div>
+    <div id="mv-div"></div>
+    <div class="mvc">
+      <div class="mvh">Spanning tree</div>
+      <canvas id="mv-tree" width="210" height="210" style="display:block;cursor:crosshair;border-radius:3px"></canvas>
+    </div>
+  </div>
+  <button id="mv-regen" onclick="rebuild()" title="Generate new maze">&#x21bb;</button>
+</div>
+<script>
+const GS=4, CS=49, WS=2, MO=2;
+const NR=14, NS=55, TO=28;
+const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+const WC=dk?'#141413':'#3d3d3a';
+const PC=dk?'#2c2c2a':'#f5f4f0';
+const COL_N={f:dk?'#042C53':'#E6F1FB',s:dk?'#185FA5':'#378ADD',t:dk?'#B5D4F4':'#0C447C'};
+const COL_H={f:dk?'#412402':'#FAEEDA',s:dk?'#BA7517':'#EF9F27',t:dk?'#FAC775':'#633806'};
+const EC=dk?'#5F5E5A':'#B4B2A9';
+const EHC=dk?'#EF9F27':'#BA7517';
+
+let maze=null, hov=-1;
+const idx=(r,c)=>r*GS+c;
+const rc=i=>[Math.floor(i/GS),i%GS];
+
+function build(){
+  const w=Array.from({length:GS*GS},()=>({n:0,s:0,e:0,w:0}));
+  const v=new Uint8Array(GS*GS),st=[0];v[0]=1;
+  const nb=(r,c)=>[[r-1,c,'n','s'],[r+1,c,'s','n'],[r,c-1,'w','e'],[r,c+1,'e','w']].filter(([nr,nc])=>nr>=0&&nr<GS&&nc>=0&&nc<GS);
+  const sh=a=>{for(let i=a.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  while(st.length){
+    const cur=st[st.length-1],[r,c]=rc(cur);
+    const opts=sh(nb(r,c).filter(([nr,nc])=>!v[idx(nr,nc)]));
+    if(opts.length){const[nr,nc,d1,d2]=opts[0];w[cur][d1]=1;w[idx(nr,nc)][d2]=1;v[idx(nr,nc)]=1;st.push(idx(nr,nc));}
+    else st.pop();
+  }
+  return w;
+}
+
+function ccol(i){return i===hov?COL_H:COL_N;}
+
+function drawMaze(){
+  const cvs=document.getElementById('mv-maze'),ctx=cvs.getContext('2d');
+  ctx.fillStyle=WC;ctx.fillRect(0,0,210,210);
+  const cx=c=>MO+WS+c*(CS+WS), cy=r=>MO+WS+r*(CS+WS);
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    ctx.fillStyle=ccol(idx(r,c)).f;
+    ctx.fillRect(cx(c),cy(r),CS,CS);
+  }
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    const i=idx(r,c),p=maze[i];
+    if(p.e&&c<GS-1){
+      const ni=idx(r,c+1);
+      ctx.fillStyle=(i===hov||ni===hov)?COL_H.f:PC;
+      ctx.fillRect(cx(c)+CS,cy(r),WS,CS);
+    }
+    if(p.s&&r<GS-1){
+      const ni=idx(r+1,c);
+      ctx.fillStyle=(i===hov||ni===hov)?COL_H.f:PC;
+      ctx.fillRect(cx(c),cy(r)+CS,CS,WS);
+    }
+  }
+}
+
+function drawTree(){
+  const cvs=document.getElementById('mv-tree'),ctx=cvs.getContext('2d');
+  ctx.clearRect(0,0,210,210);
+  const nx=c=>TO+c*NS, ny=r=>TO+r*NS;
+  ctx.lineCap='round';
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    const i=idx(r,c),p=maze[i];
+    if(p.e&&c<GS-1){
+      const ni=idx(r,c+1),hi=(i===hov||ni===hov);
+      ctx.strokeStyle=hi?EHC:EC;ctx.lineWidth=hi?2.5:1.5;
+      ctx.beginPath();ctx.moveTo(nx(c)+NR,ny(r));ctx.lineTo(nx(c+1)-NR,ny(r));ctx.stroke();
+    }
+    if(p.s&&r<GS-1){
+      const ni=idx(r+1,c),hi=(i===hov||ni===hov);
+      ctx.strokeStyle=hi?EHC:EC;ctx.lineWidth=hi?2.5:1.5;
+      ctx.beginPath();ctx.moveTo(nx(c),ny(r)+NR);ctx.lineTo(nx(c),ny(r+1)-NR);ctx.stroke();
+    }
+  }
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    const i=idx(r,c),col=ccol(i),x=nx(c),y=ny(r);
+    ctx.beginPath();ctx.arc(x,y,NR,0,Math.PI*2);
+    ctx.fillStyle=col.f;ctx.fill();
+    ctx.strokeStyle=col.s;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle=col.t;
+    ctx.font='500 9px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(`${r},${c}`,x,y);
+  }
+}
+
+function redraw(){drawMaze();drawTree();}
+
+function attach(id,hitFn){
+  const cvs=document.getElementById(id);
+  cvs.addEventListener('mousemove',e=>{
+    const b=cvs.getBoundingClientRect();
+    const h=hitFn((e.clientX-b.left)*(210/b.width),(e.clientY-b.top)*(210/b.height));
+    if(h===hov)return;
+    hov=h;redraw();
+  });
+  cvs.addEventListener('mouseleave',()=>{
+    if(hov===-1)return;hov=-1;redraw();
+  });
+}
+
+attach('mv-maze',(px,py)=>{
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){const x=MO+WS+c*(CS+WS),y=MO+WS+r*(CS+WS);if(px>=x&&px<x+CS&&py>=y&&py<y+CS)return idx(r,c);}
+  return -1;
+});
+attach('mv-tree',(px,py)=>{
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){const x=TO+c*NS,y=TO+r*NS;if((px-x)**2+(py-y)**2<=NR*NR)return idx(r,c);}
+  return -1;
+});
+
+function rebuild(){maze=build();hov=-1;redraw();}
+rebuild();
+</script>
