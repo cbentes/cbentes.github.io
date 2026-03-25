@@ -12,14 +12,10 @@ toc:
 
 ## Intro
 
-As part of our research at Pinch, we explored how the Joint-Embedding Predictive Architecture (JEPA) can be used to encode audio signal. JEPA is an emerging self-supervised learning method with big implications for how we can leverage unlabeled audio data and model semantics.
+> Our initial findings were published in the following blog post: [JEPA-v0: a self-supervised audio encoder for real-time speech translation](https://startpinch.com/research/en/jepa-encoder-translation)
+{: .block-tip }
 
-Our initial findings were published in the following blog post: 
-[JEPA-v0: a self-supervised audio encoder for real-time speech translation](https://startpinch.com/research/en/jepa-encoder-translation)
-
-
-Here my goal is just to highlight a few learnings and organize some thoughts.
-
+As part of our research at Pinch, we explored how the Joint-Embedding Predictive Architecture (JEPA) can be used to encode audio signal. JEPA is an emerging self-supervised learning method with big implications for how we can leverage unlabeled audio data and model semantics. Here my goal is just to highlight learnings and organize some thoughts.
 
 ## Collapse
 
@@ -35,10 +31,10 @@ This was what we found during our encoder development for Interspeech 2026, wher
 
 In our case, using a 12.5Hz temporal resolution meant we would do well in tasks that require low modulation rate (like speaker identity) but have difficulty in tasks requiring higher frequency resolution (like phonemic content).
 
-The combination of masking and EMA creates a cascaded low-pass filter. We can argue that:
+The combination of masking and EMA creates a cascaded low-pass filter.
 
 **The masking strategy imposes a Nyquist-like frequency cutoff** <br>
-The relationship between mask span and recoverable temporal modulation frequencies follows from elementary sampling theory. Using a Nyquist-like argument, we can expect that the context encoder can only support prediction of features whose modulation period exceeds roughly 2T_{\text{mask}}. This makes mask span a primary tuning knob: we can use ~50–100 ms spans for phoneme-heavy tasks, ~200–400 ms for prosodic/semantic tasks, and even try ~1+ s for speaker/emotion tasks.
+The relationship between mask span and recoverable temporal modulation frequencies follows from elementary sampling theory. Using a Nyquist-like argument, we can expect that the context encoder can only support prediction of features whose modulation period exceeds roughly $$2T_{\text{mask}}$$. This makes mask span a primary tuning knob: we can use ~50–100 ms spans for phoneme-heavy tasks, ~200–400 ms for prosodic/semantic tasks, and even try ~1+ s for speaker/emotion tasks.
 
 **The EMA target encoder applies a second temporal smoothing stage** <br>
 The EMA update rule creates an exponential moving average. The target encoder averages over representations spanning hours of training data. This means the target encoder's parameters evolve on a timescale far longer than any single utterance, creating target representations that emphasize features stable across many utterances.
@@ -56,23 +52,22 @@ Different layers of the encoder capture different levels of information: speaker
 ## References
 
 JEPA-v0: a self-supervised audio encoder for real-time speech translation - 
-https://startpinch.com/research/en/jepa-encoder-translation
+[https://startpinch.com/research/en/jepa-encoder-translation](https://startpinch.com/research/en/jepa-encoder-translation)
 
 Audio-JEPA: Joint-Embedding Predictive Architecture for Audio Representation Learning - 
-https://arxiv.org/abs/2507.02915
+[https://arxiv.org/abs/2507.02915](https://arxiv.org/abs/2507.02915)
 
 JEPA as a Neural Tokenizer: Learning Robust Speech Representations with Density Adaptive Attention - 
-https://arxiv.org/abs/2512.07168
+[https://arxiv.org/abs/2512.07168](https://arxiv.org/abs/2512.07168)
 
 Dual Perspectives on Non-Contrastive Self-Supervised Learning - 
-https://arxiv.org/abs/2507.01028
+[https://arxiv.org/abs/2507.01028](https://arxiv.org/abs/2507.01028)
 
 LeJEPA: Provable and Scalable Self-Supervised Learning Without the Heuristics
-https://arxiv.org/abs/2511.08544
+[https://arxiv.org/abs/2511.08544](https://arxiv.org/abs/2511.08544)
 
 Rectified LpJEPA: Joint-Embedding Predictive Architectures with Sparse and Maximum-Entropy Representations
-https://arxiv.org/abs/2602.01456
-
+[https://arxiv.org/abs/2602.01456](https://arxiv.org/abs/2602.01456)
 
 ---
 

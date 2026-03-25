@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-03-24T16:58:42+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>Personal website and blog.
-</subtitle><entry><title type="html">A-Maze</title><link href="http://localhost:4000/blog/2026/a-maze/" rel="alternate" type="text/html" title="A-Maze" /><published>2026-03-22T12:00:00+02:00</published><updated>2026-03-22T12:00:00+02:00</updated><id>http://localhost:4000/blog/2026/a-maze</id><content type="html" xml:base="http://localhost:4000/blog/2026/a-maze/"><![CDATA[<p><strong>Web App:</strong> <a href="https://a-maze-creation.vercel.app/">a-maze-creation.vercel.app</a>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://cbentes.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://cbentes.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-03-25T15:54:28+02:00</updated><id>https://cbentes.github.io/feed.xml</id><title type="html">blank</title><subtitle>Personal website and blog.
+</subtitle><entry><title type="html">A-Maze</title><link href="https://cbentes.github.io/blog/2026/a-maze/" rel="alternate" type="text/html" title="A-Maze" /><published>2026-03-22T12:00:00+02:00</published><updated>2026-03-22T12:00:00+02:00</updated><id>https://cbentes.github.io/blog/2026/a-maze</id><content type="html" xml:base="https://cbentes.github.io/blog/2026/a-maze/"><![CDATA[<p><strong>Web App:</strong> <a href="https://a-maze-creation.vercel.app/">a-maze-creation.vercel.app</a>
 <br /></p>
 
 <p>I like to play with puzzles with my kids. Mazes are especially good for the small ones, as the rules are simple and help them train their focus and motor coordination. I also like mazes, and even more so their connection with tree data structures.<br /></p>
@@ -394,7 +394,67 @@ regen();
 
 <hr />
 
-<p>Happy maze solving!</p>]]></content><author><name></name></author><category term="fun" /><category term="algorithm" /><category term="games" /><category term="maze" /><summary type="html"><![CDATA[Creating mazes for my kids]]></summary></entry><entry><title type="html">JEPA for audio encoding</title><link href="http://localhost:4000/blog/2026/jepa-for-audio/" rel="alternate" type="text/html" title="JEPA for audio encoding" /><published>2026-02-23T12:00:00+02:00</published><updated>2026-02-23T12:00:00+02:00</updated><id>http://localhost:4000/blog/2026/jepa-for-audio</id><content type="html" xml:base="http://localhost:4000/blog/2026/jepa-for-audio/"><![CDATA[<p>Joint-Embedding Predictive Architecture (JEPA) is a emerging self-supervised learning method with big implications in how we model semantics.</p>]]></content><author><name></name></author><category term="research" /><category term="JEPA" /><summary type="html"><![CDATA[JEPA architecture for audio encoding]]></summary></entry><entry><title type="html">Template</title><link href="http://localhost:4000/blog/2026/template/" rel="alternate" type="text/html" title="Template" /><published>2026-01-01T12:00:00+02:00</published><updated>2026-01-01T12:00:00+02:00</updated><id>http://localhost:4000/blog/2026/template</id><content type="html" xml:base="http://localhost:4000/blog/2026/template/"><![CDATA[<blockquote class="block-tip">
+<p>Happy maze solving!<br /> 
+CB</p>]]></content><author><name></name></author><category term="fun" /><category term="algorithm" /><category term="games" /><category term="maze" /><summary type="html"><![CDATA[Creating mazes for my kids]]></summary></entry><entry><title type="html">JEPA for audio encoding</title><link href="https://cbentes.github.io/blog/2026/jepa-for-audio/" rel="alternate" type="text/html" title="JEPA for audio encoding" /><published>2026-02-23T12:00:00+02:00</published><updated>2026-02-23T12:00:00+02:00</updated><id>https://cbentes.github.io/blog/2026/jepa-for-audio</id><content type="html" xml:base="https://cbentes.github.io/blog/2026/jepa-for-audio/"><![CDATA[<h2 id="intro">Intro</h2>
+
+<blockquote class="block-tip">
+  <p>Our initial findings were published in the following blog post: <a href="https://startpinch.com/research/en/jepa-encoder-translation">JEPA-v0: a self-supervised audio encoder for real-time speech translation</a></p>
+</blockquote>
+
+<p>As part of our research at Pinch, we explored how the Joint-Embedding Predictive Architecture (JEPA) can be used to encode audio signal. JEPA is an emerging self-supervised learning method with big implications for how we can leverage unlabeled audio data and model semantics. Here my goal is just to highlight learnings and organize some thoughts.</p>
+
+<h2 id="collapse">Collapse</h2>
+
+<p>Without explicit constraints, JEPA training can collapse to trivial solutions where all inputs map to the same representation. The most common safeguard is the Exponential Moving Average (EMA) target encoder. By stopping gradients through the target branch, EMA breaks the symmetry between the two encoders and removes the gradient signal that would otherwise drive both toward a trivial minimum.</p>
+
+<p>Recent literature shows that we can add regularization terms to the loss function that directly penalize collapse. SIGreg (used in LeJEPA) regularizes the covariance matrix to prevent dimensional collapse, while LpJEPA takes a different route using Lp-norm sparsity to enforce a spread-out distribution of embeddings.</p>
+
+<h2 id="semantic-low-pass-filter">Semantic low-pass filter</h2>
+
+<p>JEPA’s prediction-in-latent-space objective creates a strong inductive bias toward slowly varying features. 
+This was what we found during our encoder development for Interspeech 2026, where we over-represented speaker/prosodic features and under-represented phonemic detail. JEPA does capture phonetic content when architectural choices (multi-layer target averaging, short mask spans, Transformer backbones) are deliberately tuned to counteract the low-pass bias. The precise cutoff frequency of this “filter” is a design parameter, not a fixed property of the architecture.</p>
+
+<p>In our case, using a 12.5Hz temporal resolution meant we would do well in tasks that require low modulation rate (like speaker identity) but have difficulty in tasks requiring higher frequency resolution (like phonemic content).</p>
+
+<p>The combination of masking and EMA creates a cascaded low-pass filter.</p>
+
+<p><strong>The masking strategy imposes a Nyquist-like frequency cutoff</strong> <br />
+The relationship between mask span and recoverable temporal modulation frequencies follows from elementary sampling theory. Using a Nyquist-like argument, we can expect that the context encoder can only support prediction of features whose modulation period exceeds roughly \(2T_{\text{mask}}\). This makes mask span a primary tuning knob: we can use ~50–100 ms spans for phoneme-heavy tasks, ~200–400 ms for prosodic/semantic tasks, and even try ~1+ s for speaker/emotion tasks.</p>
+
+<p><strong>The EMA target encoder applies a second temporal smoothing stage</strong> <br />
+The EMA update rule creates an exponential moving average. The target encoder averages over representations spanning hours of training data. This means the target encoder’s parameters evolve on a timescale far longer than any single utterance, creating target representations that emphasize features stable across many utterances.</p>
+
+<h2 id="trajectory-and-translation">Trajectory and Translation</h2>
+
+<p>There are possible ways to counterbalance the low-pass filter behavior and recover phonetic content. The most direct one is adjusting mask length. Shorter masks force the predictor to reconstruct finer temporal detail, shifting the bias back toward phonemic features at the cost of making the prediction task easier.</p>
+
+<p>Context also helps. Given surrounding phonemes and prosodic cues, the next phoneme is partially predictable. As the predictor learns these statistical regularities, it indirectly forces the encoder to represent enough phonemic detail for those predictions to succeed.</p>
+
+<p>Different layers of the encoder capture different levels of information: speaker identity concentrates in early/middle layers, phonemic content in middle layers, and semantic information in upper layers. Averaging targets across multiple layers, rather than using only the final layer, can produce representations that retain phonetic detail that would otherwise be smoothed away.</p>
+
+<h2 id="references">References</h2>
+
+<p>JEPA-v0: a self-supervised audio encoder for real-time speech translation - 
+<a href="https://startpinch.com/research/en/jepa-encoder-translation">https://startpinch.com/research/en/jepa-encoder-translation</a></p>
+
+<p>Audio-JEPA: Joint-Embedding Predictive Architecture for Audio Representation Learning - 
+<a href="https://arxiv.org/abs/2507.02915">https://arxiv.org/abs/2507.02915</a></p>
+
+<p>JEPA as a Neural Tokenizer: Learning Robust Speech Representations with Density Adaptive Attention - 
+<a href="https://arxiv.org/abs/2512.07168">https://arxiv.org/abs/2512.07168</a></p>
+
+<p>Dual Perspectives on Non-Contrastive Self-Supervised Learning - 
+<a href="https://arxiv.org/abs/2507.01028">https://arxiv.org/abs/2507.01028</a></p>
+
+<p>LeJEPA: Provable and Scalable Self-Supervised Learning Without the Heuristics
+<a href="https://arxiv.org/abs/2511.08544">https://arxiv.org/abs/2511.08544</a></p>
+
+<p>Rectified LpJEPA: Joint-Embedding Predictive Architectures with Sparse and Maximum-Entropy Representations
+<a href="https://arxiv.org/abs/2602.01456">https://arxiv.org/abs/2602.01456</a></p>
+
+<hr />
+
+<p>CB</p>]]></content><author><name></name></author><category term="research" /><category term="encoder" /><category term="pinch" /><category term="JEPA" /><summary type="html"><![CDATA[JEPA architecture for audio encoding]]></summary></entry><entry><title type="html">Template</title><link href="https://cbentes.github.io/blog/2026/template/" rel="alternate" type="text/html" title="Template" /><published>2026-01-01T12:00:00+02:00</published><updated>2026-01-01T12:00:00+02:00</updated><id>https://cbentes.github.io/blog/2026/template</id><content type="html" xml:base="https://cbentes.github.io/blog/2026/template/"><![CDATA[<blockquote class="block-tip">
   <p>Template page</p>
 </blockquote>
 
