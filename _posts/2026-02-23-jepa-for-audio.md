@@ -5,6 +5,7 @@ date: 2026-02-23 10:00:00
 description: JEPA architecture for audio encoding
 tags: JEPA
 categories: research encoder pinch
+thumbnail: assets/img/post_jepa_encoding/thumbnail_wave.png
 toc:
   sidebar: left
 ---
